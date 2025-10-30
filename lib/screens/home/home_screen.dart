@@ -133,21 +133,29 @@ class DashboardPage extends StatelessWidget {
   }
   
   List<Color> _getCardGradientColors(double score, bool isDarkMode) {
-    if (isDarkMode) {
-      return [const Color(0xFF1A1A1A), const Color(0xFF2A2A2A)];
+    if (score >= 80) {
+      return isDarkMode
+        ? [const Color(0xFF065F46), const Color(0xFF047857)]
+        : [const Color(0xFFECFDF5), const Color(0xFFD1FAE5)];
+    } else if (score >= 50) {
+      return isDarkMode
+        ? [const Color(0xFF7C2D12), const Color(0xFF9A3412)]
+        : [const Color(0xFFFEF3C7), const Color(0xFFFDE68A)];
     } else {
-      return [Colors.white, const Color(0xFFFAFAFA)];
+      return isDarkMode
+        ? [const Color(0xFF7F1D1D), const Color(0xFF991B1B)]
+        : [const Color(0xFFFEE2E2), const Color(0xFFFECACA)];
     }
   }
   
   Color _getPostureColor(PostureStatus status) {
     switch (status) {
       case PostureStatus.good:
-        return Colors.orange;
+        return Colors.green;
       case PostureStatus.moderate:
-        return Colors.orange.withOpacity(0.7);
+        return Colors.orange;
       case PostureStatus.bad:
-        return Colors.orange.withOpacity(0.4);
+        return Colors.red;
       default:
         return Colors.grey;
     }
@@ -350,10 +358,15 @@ class DashboardPage extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.orange.withOpacity(0.1),
+                              Colors.deepOrange.withOpacity(0.1),
+                            ],
+                          ),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.orange.withOpacity(0.2),
+                            color: Colors.orange.withOpacity(0.3),
                             width: 1,
                           ),
                         ),
@@ -440,48 +453,85 @@ class DashboardPage extends StatelessWidget {
               
               // Health Tips Section
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
                 child: _buildHealthTip(isDarkMode),
               ).animate().fadeIn(delay: 500.ms),
               
-              // Daily Challenge Section
+              // Wellness Insights Section with Orange/Black Theme
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                child: _buildDailyChallenge(healthProvider, isDarkMode),
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Wellness Insights',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode ? Colors.white : const Color(0xFF1A1A1A),
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.orange.shade600, Colors.orange.shade800],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'NEW',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _buildInsightCards(healthProvider, postureProvider, isDarkMode),
+                  ],
+                ),
               ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
               
-              // Achievement Badges Section
+              // Visual Achievement Gallery
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                child: _buildAchievements(healthProvider, isDarkMode),
-              ).animate().fadeIn(delay: 700.ms),
-              
-              // Wellness Resources Section
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Wellness Resources',
+                      'Your Journey',
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                         color: isDarkMode ? Colors.white : const Color(0xFF1A1A1A),
                         letterSpacing: 0.3,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildWellnessCards(context, isDarkMode),
+                    _buildJourneyCards(healthProvider, isDarkMode),
                   ],
                 ),
+              ).animate().fadeIn(delay: 700.ms).scale(begin: const Offset(0.95, 0.95)),
+              
+              // Posture Trends Visualization
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                child: _buildTrendsSection(postureProvider, isDarkMode),
               ).animate().fadeIn(delay: 800.ms),
               
-              // Community Section
+              // Motivational Quote Section
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-                child: _buildCommunitySection(isDarkMode),
-              ).animate().fadeIn(delay: 900.ms),
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 30),
+                child: _buildMotivationalSection(healthProvider, isDarkMode),
+              ).animate().fadeIn(delay: 900.ms).slideY(begin: 0.1, end: 0),
             ],
           ),
         ),
@@ -580,39 +630,39 @@ class DashboardPage extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Posture Status',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                            letterSpacing: 0.5,
+                          Text(
+                            'Posture Status',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                              letterSpacing: 0.5,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(status),
-                                shape: BoxShape.circle,
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(status),
+                                  shape: BoxShape.circle,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              _getStatusText(status),
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: isDarkMode ? Colors.white : const Color(0xFF1A1A1A),
+                              const SizedBox(width: 8),
+                              Text(
+                                _getStatusText(status),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDarkMode ? Colors.white : const Color(0xFF1A1A1A),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            ],
+                          ),
+                        ],
+                      ),
                     _buildScoreIndicator(score, isDarkMode),
                   ],
                 ),
@@ -638,7 +688,7 @@ class DashboardPage extends StatelessWidget {
             strokeWidth: 6,
             backgroundColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(
-              Colors.orange,
+              score >= 80 ? Colors.green : score >= 50 ? Colors.orange : Colors.red,
             ),
           ),
         ),
@@ -977,470 +1027,448 @@ class DashboardPage extends StatelessWidget {
     );
   }
   
-  // New widget methods for additional sections
-  Widget _buildDailyChallenge(HealthProvider provider, bool isDarkMode) {
-    final challenges = [
-      {'title': '30 Minute Posture Check', 'desc': 'Monitor your posture every 30 minutes', 'icon': Icons.timer},
-      {'title': 'Hydration Hero', 'desc': 'Drink 8 glasses of water today', 'icon': Icons.water_drop},
-      {'title': 'Stretch Master', 'desc': 'Complete 5 stretching exercises', 'icon': Icons.self_improvement},
-      {'title': 'Perfect Posture Hour', 'desc': 'Maintain good posture for 1 hour straight', 'icon': Icons.accessibility_new},
-    ];
-    
-    final todaysChallenge = challenges[DateTime.now().day % challenges.length];
-    final accentColor = Colors.orange;
-    
+  Widget _buildInsightCards(HealthProvider healthProvider, PostureProvider postureProvider, bool isDarkMode) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDarkMode ? Colors.grey[800]! : Colors.grey[200]!,
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  todaysChallenge['icon'] as IconData,
-                  color: accentColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Daily Challenge',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      todaysChallenge['title'] as String,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : const Color(0xFF1A1A1A),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Animated Trophy
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.emoji_events,
-                  color: accentColor,
-                  size: 24,
-                ),
-              ).animate(onPlay: (controller) => controller.repeat())
-                .rotate(begin: -0.05, end: 0.05, duration: 2000.ms)
-                .then()
-                .rotate(begin: 0.05, end: -0.05, duration: 2000.ms),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            todaysChallenge['desc'] as String,
-            style: TextStyle(
-              fontSize: 14,
-              color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
-            ),
-          ),
-          const SizedBox(height: 16),
-          LinearProgressIndicator(
-            value: provider.exercisesCompleted > 0 ? 0.3 : 0.0,
-            backgroundColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-            minHeight: 6,
-            borderRadius: BorderRadius.circular(3),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildAchievements(HealthProvider provider, bool isDarkMode) {
-    final accentColor = Colors.orange;
-    final badges = [
-      {'name': 'Early Bird', 'icon': Icons.wb_sunny, 'unlocked': provider.exerciseStreak > 0},
-      {'name': 'Hydrated', 'icon': Icons.water_drop, 'unlocked': provider.waterIntake >= 1000},
-      {'name': 'Active', 'icon': Icons.directions_run, 'unlocked': provider.exercisesCompleted >= 3},
-      {'name': 'Consistent', 'icon': Icons.calendar_today, 'unlocked': provider.exerciseStreak >= 3},
-      {'name': 'Champion', 'icon': Icons.star, 'unlocked': provider.exerciseStreak >= 7},
-    ];
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Your Achievements',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: isDarkMode ? Colors.white : const Color(0xFF1A1A1A),
-                letterSpacing: 0.3,
-              ),
-            ),
-            Text(
-              '${badges.where((b) => b['unlocked'] as bool).length}/${badges.length} Unlocked',
-              style: TextStyle(
-                fontSize: 12,
-                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: badges.length,
-            itemBuilder: (context, index) {
-              final badge = badges[index];
-              final unlocked = badge['unlocked'] as bool;
-              
-              return Container(
-                width: 80,
-                margin: const EdgeInsets.only(right: 12),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: unlocked 
-                          ? accentColor 
-                          : (isDarkMode ? Colors.grey[800] : Colors.grey[300]),
-                        shape: BoxShape.circle,
-                        boxShadow: unlocked ? [
-                          BoxShadow(
-                            color: accentColor.withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ] : [],
-                      ),
-                      child: Icon(
-                        badge['icon'] as IconData,
-                        color: unlocked ? Colors.white : (isDarkMode ? Colors.grey[600] : Colors.grey[500]),
-                        size: 28,
-                      ),
-                    ).animate(delay: Duration(milliseconds: index * 100))
-                      .scale(begin: const Offset(0, 0), end: const Offset(1, 1), duration: 400.ms, curve: Curves.elasticOut),
-                    const SizedBox(height: 8),
-                    Text(
-                      badge['name'] as String,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: unlocked ? FontWeight.w600 : FontWeight.normal,
-                        color: isDarkMode ? Colors.white70 : Colors.black87,
-                      ),
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildWellnessCards(BuildContext context, bool isDarkMode) {
-    final accentColor = Colors.orange;
-    final resources = [
-      {
-        'title': 'Perfect Desk Setup',
-        'subtitle': '5 min read',
-        'image': '🖥️',
-      },
-      {
-        'title': 'Morning Stretches',
-        'subtitle': '10 exercises',
-        'image': '🧘',
-      },
-      {
-        'title': 'Eye Care Tips',
-        'subtitle': '3 min read',
-        'image': '👁️',
-      },
-      {
-        'title': 'Breathing Exercises',
-        'subtitle': '5 techniques',
-        'image': '🌬️',
-      },
-    ];
-    
-    return SizedBox(
       height: 180,
-      child: ListView.builder(
+      child: ListView(
         scrollDirection: Axis.horizontal,
-        itemCount: resources.length,
-        itemBuilder: (context, index) {
-          final resource = resources[index];
-          return Container(
-            width: 150,
-            margin: EdgeInsets.only(right: 16, left: index == 0 ? 0 : 0),
-            child: InkWell(
-              onTap: () {
-                // Navigate to resource
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: index == 0 
-                    ? accentColor 
-                    : (isDarkMode ? const Color(0xFF1A1A1A) : Colors.white),
-                  borderRadius: BorderRadius.circular(16),
-                  border: index != 0 ? Border.all(
-                    color: isDarkMode ? Colors.grey[800]! : Colors.grey[200]!,
-                    width: 1,
-                  ) : null,
-                  boxShadow: [
-                    BoxShadow(
-                      color: index == 0 
-                        ? accentColor.withOpacity(0.3)
-                        : Colors.black.withOpacity(isDarkMode ? 0.2 : 0.05),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+        children: [
+          // Posture Score Card with Gradient
+          Container(
+            width: 160,
+            margin: const EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.orange.shade400,
+                  Colors.deepOrange.shade600,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.orange.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
-                child: Stack(
-                  children: [
-                    // Decorative circles
-                    Positioned(
-                      top: -20,
-                      right: -20,
-                      child: Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: index == 0
-                            ? Colors.white.withOpacity(0.1)
-                            : accentColor.withOpacity(0.05),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.trending_up,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${postureProvider.postureScore.toInt()}%',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: index == 0
-                                ? Colors.white.withOpacity(0.2)
-                                : accentColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              resource['image'] as String,
-                              style: const TextStyle(fontSize: 28),
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            resource['title'] as String,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: index == 0
-                                ? Colors.white
-                                : (isDarkMode ? Colors.white : const Color(0xFF1A1A1A)),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            resource['subtitle'] as String,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: index == 0
-                                ? Colors.white.withOpacity(0.9)
-                                : (isDarkMode ? Colors.grey[400] : Colors.grey[600]),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Posture Score',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ).animate(delay: Duration(milliseconds: index * 100))
-            .fadeIn(duration: 400.ms)
-            .slideX(begin: 0.2, end: 0);
+          ).animate()
+            .fadeIn(delay: 100.ms)
+            .slideX(begin: 0.2, end: 0),
+          
+          // Daily Goal Card - Black Theme
+          Container(
+            width: 160,
+            margin: const EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDarkMode
+                  ? [const Color(0xFF1A1A1A), const Color(0xFF2D2D2D)]
+                  : [Colors.grey.shade800, Colors.black87],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.flag,
+                      color: Colors.orange,
+                      size: 28,
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${(healthProvider.exercisesCompleted / 5 * 100).toInt()}%',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        'Daily Goal',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ).animate()
+            .fadeIn(delay: 200.ms)
+            .slideX(begin: 0.2, end: 0),
+          
+          // Wellness Tips Card
+          Container(
+            width: 160,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.purple.shade400,
+                  Colors.purple.shade600,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.purple.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.spa,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Wellness',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        'Stay healthy',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ).animate()
+            .fadeIn(delay: 300.ms)
+            .slideX(begin: 0.2, end: 0),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildJourneyCards(HealthProvider provider, bool isDarkMode) {
+    final achievements = [
+      {'icon': Icons.emoji_events, 'title': 'First Steps', 'desc': 'Started journey', 'color': Colors.amber},
+      {'icon': Icons.local_fire_department, 'title': '${provider.exerciseStreak} Day Streak', 'desc': 'Keep going!', 'color': Colors.orange},
+      {'icon': Icons.water_drop, 'title': '${provider.waterIntake}ml', 'desc': 'Hydration today', 'color': Colors.blue},
+      {'icon': Icons.check_circle, 'title': '${provider.exercisesCompleted} Done', 'desc': 'Exercises today', 'color': Colors.green},
+    ];
+    
+    return Container(
+      height: 120,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: achievements.length,
+        itemBuilder: (context, index) {
+          final achievement = achievements[index];
+          return Container(
+            width: 140,
+            margin: EdgeInsets.only(right: index < achievements.length - 1 ? 12 : 0),
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF1F1F1F) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: (achievement['color'] as Color).withOpacity(0.3),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: (achievement['color'] as Color).withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: (achievement['color'] as Color).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      achievement['icon'] as IconData,
+                      color: achievement['color'] as Color,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    achievement['title'] as String,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1A1A1A),
+                    ),
+                  ),
+                  Text(
+                    achievement['desc'] as String,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ).animate()
+            .fadeIn(delay: Duration(milliseconds: 100 * index))
+            .scale(begin: const Offset(0.8, 0.8));
         },
       ),
     );
   }
   
-  Widget _buildCommunitySection(bool isDarkMode) {
-    final accentColor = Colors.orange;
+  Widget _buildTrendsSection(PostureProvider provider, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
+        gradient: LinearGradient(
+          colors: isDarkMode
+            ? [Colors.orange.shade900.withOpacity(0.2), Colors.black.withOpacity(0.3)]
+            : [Colors.orange.shade50, Colors.orange.shade100],
+        ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: accentColor.withOpacity(0.2),
+          color: Colors.orange.withOpacity(0.2),
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Weekly Trend',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : const Color(0xFF1A1A1A),
+                ),
+              ),
+              Icon(
+                provider.postureScore > 70 ? Icons.trending_up : Icons.trending_down,
+                color: provider.postureScore > 70 ? Colors.green : Colors.orange,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Mini bar chart
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: List.generate(7, (index) {
+              final heights = [0.4, 0.6, 0.5, 0.7, 0.8, 0.6, 0.9];
+              final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+              return Column(
+                children: [
+                  Container(
+                    width: 30,
+                    height: 60 * heights[index],
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: index == 6
+                          ? [Colors.orange, Colors.deepOrange]
+                          : [Colors.grey.shade400, Colors.grey.shade600],
+                      ),
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                    ),
+                  ).animate()
+                    .scaleY(
+                      begin: 0,
+                      end: 1,
+                      delay: Duration(milliseconds: 50 * index),
+                      duration: 400.ms,
+                      curve: Curves.easeOutBack,
+                    ),
+                  const SizedBox(height: 4),
+                  Text(
+                    days[index],
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              );
+            }),
           ),
         ],
       ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.people,
-                  color: accentColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Join the Community',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : const Color(0xFF1A1A1A),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Connect with 10,000+ users improving their posture',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    );
+  }
+  
+  Widget _buildMotivationalSection(HealthProvider provider, bool isDarkMode) {
+    final quotes = [
+      {'quote': 'Your posture is the foundation of every movement', 'author': 'Health Expert'},
+      {'quote': 'Stand tall, feel powerful', 'author': 'Motivation Daily'},
+      {'quote': 'Good posture is a sign of confidence', 'author': 'Wellness Coach'},
+    ];
+    
+    final randomQuote = quotes[DateTime.now().second % quotes.length];
+    
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black87,
+            Colors.orange.shade900,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              // User avatars stack
-              SizedBox(
-                width: 100,
-                height: 40,
-                child: Stack(
-                  children: List.generate(4, (index) {
-                    final emojis = ['😊', '🎯', '💪', '🌟'];
-                    return Positioned(
-                      left: index * 20.0,
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: isDarkMode 
-                            ? Colors.grey[800] 
-                            : Colors.grey[100],
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
-                            width: 2,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            emojis[index],
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    ).animate(delay: Duration(milliseconds: index * 100))
-                      .scale(begin: const Offset(0, 0), end: const Offset(1, 1), duration: 400.ms, curve: Curves.elasticOut);
-                  }),
-                ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Background pattern
+          Positioned(
+            right: -30,
+            top: -30,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.orange.withOpacity(0.1),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  '+9,996 active members',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                  ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.format_quote,
+                  color: Colors.orange,
+                  size: 32,
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to community
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accentColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Join Now',
+                const SizedBox(height: 12),
+                Text(
+                  randomQuote['quote']!,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    fontStyle: FontStyle.italic,
+                    height: 1.4,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  '— ${randomQuote['author']}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.orange.shade300,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
