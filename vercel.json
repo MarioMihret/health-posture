@@ -1,0 +1,12 @@
+{
+  "buildCommand": "echo 'Already built locally'",
+  "outputDirectory": "build/web",
+  "installCommand": "echo 'No install needed'",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
+}
