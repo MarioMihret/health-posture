@@ -31,10 +31,7 @@ jobs:
       run: flutter pub get
     
     - name: Build APK (Simple)
-      run: |
-        flutter build apk --release \
-          --android-skip-build-dependency-validation \
-          --no-tree-shake-icons
+      run: flutter build apk --release --split-per-abi
     
     - name: Upload APK
       uses: actions/upload-artifact@v4

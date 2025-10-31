@@ -31,15 +31,7 @@ jobs:
       run: flutter pub get
     
     - name: Build APK
-      run: |
-        flutter build apk --release \
-          --android-skip-build-dependency-validation \
-          --dart-define=FLUTTER_BUILD_MODE=release \
-          --dart-define=FLUTTER_BUILD_NAME=1.0.0 \
-          --dart-define=FLUTTER_BUILD_NUMBER=1 || \
-        flutter build apk --release \
-          --no-tree-shake-icons \
-          --android-skip-build-dependency-validation
+      run: flutter build apk --release
     
     - name: Upload APK
       uses: actions/upload-artifact@v4

@@ -7,11 +7,12 @@ plugins {
 
 android {
     namespace = "com.posturehealth.assistant"
-    compileSdk = 34
+    compileSdk = 36
     
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        coreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -34,6 +35,10 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
 }
 
 flutter {
