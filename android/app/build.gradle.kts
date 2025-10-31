@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.posturehealth.assistant"
     compileSdk = 34
-    ndkVersion = "27.3.12077973"
+    // Remove NDK requirement - not needed for this app
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
