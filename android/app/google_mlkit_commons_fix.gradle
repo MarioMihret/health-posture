@@ -1,0 +1,19 @@
+// Fix for google_mlkit_commons namespace issue with AGP 8+
+subprojects {
+    afterEvaluate { project ->
+        if (project.name == "google_mlkit_commons" || 
+            project.name == "google_mlkit_pose_detection" ||
+            project.name == "camera_android" ||
+            project.name == "flutter_plugin_android_lifecycle") {
+            
+            android {
+                namespace = "com.google.mlkit.${project.name.replace('-', '_')}"
+                compileSdkVersion 34
+                
+                defaultConfig {
+                    minSdkVersion 21
+                }
+            }
+        }
+    }
+}

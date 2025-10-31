@@ -1,0 +1,44 @@
+name: Build APK (Simple)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.35.3'
+        channel: 'stable'
+    
+    # Remove ML Kit to avoid compatibility issues
+    - name: Remove incompatible packages
+      run: |
+        # Comment out google_mlkit_pose_detection in pubspec.yaml
+        sed -i 's/google_mlkit_pose_detection:/#google_mlkit_pose_detection:/g' pubspec.yaml
+        
+        # Clean and get dependencies
+        flutter clean
+        flutter pub get
+    
+    - name: Build APK (without ML Kit)
+      run: flutter build apk --release --android-skip-build-dependency-validation
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: posture-health-app-simple
+        path: build/app/outputs/flutter-apk/app-release.apk
