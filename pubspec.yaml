@@ -17,7 +17,7 @@ dependencies:
   
   # Camera and AI
   camera: ^0.10.5+5
-  tflite_flutter: ^0.10.3
+  # tflite_flutter: ^0.10.3  # Temporarily disabled - R8 minification issues
   # google_mlkit_pose_detection: ^0.5.0  # Temporarily disabled - compatibility issues
   permission_handler: ^11.0.1
   
