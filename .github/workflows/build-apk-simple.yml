@@ -24,18 +24,17 @@ jobs:
         flutter-version: '3.35.3'
         channel: 'stable'
     
-    # Remove ML Kit to avoid compatibility issues
-    - name: Remove incompatible packages
-      run: |
-        # Comment out google_mlkit_pose_detection in pubspec.yaml
-        sed -i 's/google_mlkit_pose_detection:/#google_mlkit_pose_detection:/g' pubspec.yaml
-        
-        # Clean and get dependencies
-        flutter clean
-        flutter pub get
+    - name: Clean build
+      run: flutter clean
     
-    - name: Build APK (without ML Kit)
-      run: flutter build apk --release --android-skip-build-dependency-validation
+    - name: Get dependencies  
+      run: flutter pub get
+    
+    - name: Build APK (Simple)
+      run: |
+        flutter build apk --release \
+          --android-skip-build-dependency-validation \
+          --no-tree-shake-icons
     
     - name: Upload APK
       uses: actions/upload-artifact@v4

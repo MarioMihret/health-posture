@@ -5,6 +5,19 @@ allprojects {
     }
 }
 
+// Fix for google_mlkit packages namespace issue
+subprojects {
+    afterEvaluate {
+        if ((project.name == "google_mlkit_commons" || 
+             project.name == "google_mlkit_pose_detection" ||
+             project.name == "camera_android" ||
+             project.name == "flutter_plugin_android_lifecycle") && 
+             project.hasProperty("android")) {
+            project.android.namespace = project.android.namespace ?: project.group
+        }
+    }
+}
+
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")

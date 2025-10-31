@@ -30,33 +30,16 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
     
-    - name: Fix Google ML Kit compatibility
-      run: |
-        # Create namespace fix for google_mlkit packages
-        cat > android/namespace_fix.gradle << 'EOF'
-        subprojects {
-            afterEvaluate { project ->
-                if (project.hasProperty("android")) {
-                    android {
-                        if (!project.hasProperty("namespace")) {
-                            namespace = project.group ?: "com.google.mlkit.commons"
-                        }
-                    }
-                }
-            }
-        }
-        EOF
-        
-        # Add to settings.gradle.kts
-        echo 'apply from: "../namespace_fix.gradle"' >> android/settings.gradle.kts
-    
     - name: Build APK
       run: |
         flutter build apk --release \
           --android-skip-build-dependency-validation \
           --dart-define=FLUTTER_BUILD_MODE=release \
           --dart-define=FLUTTER_BUILD_NAME=1.0.0 \
-          --dart-define=FLUTTER_BUILD_NUMBER=1
+          --dart-define=FLUTTER_BUILD_NUMBER=1 || \
+        flutter build apk --release \
+          --no-tree-shake-icons \
+          --android-skip-build-dependency-validation
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
