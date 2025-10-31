@@ -32,7 +32,7 @@ dependencies:
   percent_indicator: ^4.2.3
   
   # Notifications and scheduling
-  flutter_local_notifications: ^16.1.0
+  flutter_local_notifications: ^17.2.3
   workmanager: ^0.5.2
   
   # State management and utilities
