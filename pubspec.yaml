@@ -33,14 +33,14 @@ dependencies:
   
   # Notifications and scheduling
   flutter_local_notifications: ^17.2.3
-  workmanager: ^0.5.2
+  # workmanager: ^0.5.2  # Temporarily disabled - incompatible with current Android setup
   
   # State management and utilities
   get: ^4.6.6
   intl: ^0.18.1
   
   # Health data
-  health: ^9.0.0
+  health: ^10.2.0
   
   # Video player
   video_player: ^2.8.2
