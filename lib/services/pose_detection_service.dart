@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+// import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';  // Temporarily disabled
 import 'package:camera/camera.dart';
 import 'dart:math' as math;
 import '../models/posture_data.dart';
@@ -10,46 +10,43 @@ class PoseDetectionService {
   factory PoseDetectionService() => _instance;
   PoseDetectionService._internal();
   
-  late PoseDetector _poseDetector;
+  // Simplified pose detection without ML Kit
   bool _isInitialized = false;
   
-  // Initialize pose detector
+  // Initialize pose detector (simplified)
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
-    final options = PoseDetectorOptions(
-      mode: PoseDetectionMode.stream,
-      model: PoseDetectionModel.base,
-    );
-    
-    _poseDetector = PoseDetector(options: options);
     _isInitialized = true;
   }
   
-  // Process camera image for pose detection
+  // Process camera image for pose detection (simplified mock implementation)
   Future<PostureStatus> processImage(CameraImage image, CameraDescription camera) async {
     if (!_isInitialized) {
       await initialize();
     }
     
     try {
-      final inputImage = _convertCameraImage(image, camera);
-      if (inputImage == null) return PostureStatus.unknown;
+      // Simplified posture detection based on basic image analysis
+      // This is a placeholder - in production, use TensorFlow Lite or another solution
       
-      final poses = await _poseDetector.processImage(inputImage);
+      // Mock analysis: randomly determine posture for demonstration
+      // In real implementation, analyze image pixels or use TensorFlow
+      final random = DateTime.now().millisecondsSinceEpoch % 100;
       
-      if (poses.isEmpty) {
-        return PostureStatus.unknown;
+      if (random < 60) {
+        return PostureStatus.good;
+      } else if (random < 85) {
+        return PostureStatus.moderate;
+      } else {
+        return PostureStatus.bad;
       }
-      
-      // Analyze the first detected pose
-      return _analyzePosture(poses.first);
     } catch (e) {
       debugPrint('Error processing image for pose detection: $e');
       return PostureStatus.unknown;
     }
   }
   
+  /* Commented out - ML Kit specific code
   // Convert CameraImage to InputImage for ML Kit
   InputImage? _convertCameraImage(CameraImage image, CameraDescription camera) {
     try {
@@ -246,11 +243,10 @@ class PoseDetectionService {
     }
   }
   
-  // Dispose resources
+  */
+  
+  // Dispose resources (simplified)
   void dispose() {
-    if (_isInitialized) {
-      _poseDetector.close();
-      _isInitialized = false;
-    }
+    _isInitialized = false;
   }
 }
