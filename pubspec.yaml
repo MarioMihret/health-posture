@@ -40,7 +40,7 @@ dependencies:
   intl: ^0.18.1
   
   # Health data
-  health: ^10.2.0
+  # health: ^10.2.0  # Temporarily disabled - v1 embedding issues
   
   # Video player
   video_player: ^2.8.2
