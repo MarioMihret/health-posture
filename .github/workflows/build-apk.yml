@@ -16,7 +16,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
-        java-version: '11'
+        java-version: '17'
     
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -31,7 +31,11 @@ jobs:
       run: flutter pub get
     
     - name: Build APK
-      run: flutter build apk --release
+      run: |
+        flutter build apk --release \
+          --dart-define=FLUTTER_BUILD_MODE=release \
+          --dart-define=FLUTTER_BUILD_NAME=1.0.0 \
+          --dart-define=FLUTTER_BUILD_NUMBER=1
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
